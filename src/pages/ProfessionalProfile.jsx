@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FaTools, FaUserEdit, FaMapMarkedAlt } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -6,14 +6,14 @@ import api from "../services/api";
 import Spinner from '../components/Spinner'
 
 // Array de tipos de serviço (exemplo)
-const serviceTypes = [
-  "Encanador",
-  "Eletricista",
-  "Pedreiro",
-  "Pintor",
-  "Jardineiro",
-  "Técnico de Informática",
-];
+// const serviceTypes = [
+//   "Encanador",
+//   "Eletricista",
+//   "Pedreiro",
+//   "Pintor",
+//   "Jardineiro",
+//   "Técnico de Informática",
+// ];
 
 export default function ProfessionalProfile() {
 
@@ -37,6 +37,7 @@ export default function ProfessionalProfile() {
 
 
   const [messageSucess, setMensagemSucess] = useState('');
+  const [serviceTypes, setServiceTypes] = useState([]);
   const [messageError, setMensagemError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +55,35 @@ export default function ProfessionalProfile() {
     formState: { errors },
   } = useForm();
 
+
+  const BuscarProfissoes = async () => {
+
+    setLoading(true)
+
+    try {
+
+      const busca = await api.get('/services')
+      const servicos = busca.data;
+
+      console.log(servicos)
+      setServiceTypes(servicos);
+
+    } catch (error) {
+      console.error('erro ao carregar servicos:', error)
+
+    } finally {
+      setLoading(false)
+    }
+
+  }
+
+  // useEffect para buscar servicos
+
+  useEffect(() => {
+    BuscarProfissoes()
+  }, [])
+
+
   const onSubmit = async (data) => {
 
 
@@ -65,9 +95,14 @@ export default function ProfessionalProfile() {
     const image_url = 'img.jpg'
     const Dados = { ...data, image_url, user_id }
     setLoading(true)
+    console.log(Dados)
     try {
 
-      const enviar = await api.post('/professional/profile', Dados);
+      const enviar = await api.post('/professional/profile', Dados, {
+        headers:{
+          'Authorization': `Bearer ${userData?.token}`,
+        }
+      });
 
       if (enviar.status == 200) {
         setMensagemSucess(`${userData?.user?.name}, ${enviar?.data?.message}`)
@@ -125,9 +160,9 @@ export default function ProfessionalProfile() {
                 className="w-full pl-10 p-3 border-b-2 border-gray-300 focus:border-vinho focus:outline-none appearance-none bg-white"
               >
                 <option value="">Selecione seu serviço</option>
-                {serviceTypes.map((service, index) => (
-                  <option key={index} value={index}>
-                    {service}
+                {serviceTypes?.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
                   </option>
                 ))}
               </select>

@@ -1,40 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { Order, UserData, ProfessionalProfile } from '../types/interfaces';
 import { FaCalendarAlt, FaMapMarkerAlt, FaTag, FaInfoCircle, FaClock, FaArrowRight } from 'react-icons/fa';
+import AuthContext from '../context/AuthContext';
+
 
 export default function Orders() {
+
+  const {token , isAuthenticated}= useContext(AuthContext)
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
-  const location = useLocation();
-  const { serviceId } = location.state || {}; // Assuming service_id is passed via state
+  const userData: UserData | null = JSON.parse(localStorage.getItem('userData') || 'null');
 
   useEffect(() => {
     const userData: UserData | null = JSON.parse(localStorage.getItem('userData') || 'null');
 
-    if (!userData || !userData.token) {
-      navigate('/login');
-      return;
-    }
 
     const fetchOrders = async () => {
+
       try {
         setLoading(true);
         setErrorMessage('');
 
         // You might need to get the service_id from userData.user or other means if not passed via state
-        const requestBody = serviceId ? { service_id: serviceId } : {};
 
-        const response = await api.get<Order[]>(`/pedidos/${1}`,{
+       if(userData && userData.role==='profissional'){
+        const response = await api.get<Order[]>(`/pedidos/${userData?.service_id}`,{
           headers: {
-            Authorization: `Bearer ${userData.token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         setOrders(response.data);
         console.log('Orders fetched:', response.data);
+       }else{
+        const response = await api.get<Order[]>(`/pedidos/byUser/${userData?.id}`,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setOrders(response.data);
+        console.log('Orders fetched:', response.data);
+       }
+
+
       } catch (error) {
         console.error('Erro ao buscar pedidos:', error);
         setErrorMessage('Erro ao carregar pedidos. Tente novamente.');
@@ -44,10 +56,10 @@ export default function Orders() {
     };
 
     fetchOrders();
-  }, [navigate, serviceId]);
+  }, [navigate]);
 
-  const handleRespondToOrder = (orderId: string) => {
-    navigate('/orderResponse', { state: { id: orderId } });
+  const handleRespondToOrder = (orderId: string, client_id: string) => {
+    navigate('/orderResponse', { state: { id: orderId, user_id:client_id } });
   };
 
   return (
@@ -61,7 +73,17 @@ export default function Orders() {
           <div className="text-center py-12 text-red-500">{errorMessage}</div>
         ) : orders.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
+
+            {
+              userData?.role==="cliente" ? 
+              <div>
+               <p className="text-xl"> {userData.name}, Voce ainda não fez nenhum pedido.</p>
+               <p onClick={() => navigate('/order')}>Fazer Pedido</p>
+               </div>
+                :
+            
             <p className="text-xl">Nenhum pedido disponível para o seu serviço no momento.</p>
+}
             {/* Optional: Add a link to browse other services or go back */}
           </div>
         ) : (
@@ -96,12 +118,15 @@ export default function Orders() {
                 </div>
 
                 <div className="mt-6 text-right">
-                  <button
-                    onClick={() => handleRespondToOrder(order.id)}
+                  {
+                    userData?.role==='profissional' && (
+                      <button
+                    onClick={() => handleRespondToOrder(order.id, order.client_id)}
                     className="bg-vinho text-white py-2 px-6 rounded-lg hover:bg-[#6a001a] transition-colors font-medium flex items-center justify-center ml-auto"
-                  >
+                    >
                     Responder ao Pedido <FaArrowRight className="ml-2" />
                   </button>
+                    )}
                 </div>
               </div>
             ))}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,6 +6,7 @@ import { FaPhone, FaLock, FaArrowRight } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import api from '../services/api'
 import Spinner from "../components/Spinner";
+import AuthContext from "../context/AuthContext";
 
 // Esquema de validação com Zod
 const schema = z.object({
@@ -23,6 +24,7 @@ const schema = z.object({
 export default function Login() {
 
   const navigate = useNavigate()
+  const { login } = useContext(AuthContext);
   const [Mensagem, setMensagem] = useState('')
   const [mensagemSucess, setMensagemSucess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,7 +45,7 @@ export default function Login() {
     setLoading(true)
     try {
 
-      const enviar = await api.post('/users/login', data)
+      const response = await api.post('/users/login', data)
 
       // console.log(enviar)
       setMensagemSucess('Login realizado com sucesso')
@@ -51,12 +53,14 @@ export default function Login() {
 
       // persistir dados do usuario e token
 
-      localStorage.setItem('userData', JSON.stringify(enviar.data))
+      const { token, user } = response.data;
+      login(token);
+      localStorage.setItem('userData', JSON.stringify(user))
 
       setTimeout(() => {
         reset() // limpar os campos do formulario
 
-        if (enviar.data.user.role == 'profissional') {
+        if (user.role == 'profissional') {
 
           navigate('/'); return;     // redirecionar para login
         }
@@ -71,11 +75,11 @@ export default function Login() {
 
     } catch (error) {
 
-      console.error('erro ao cadastra:', error.status)
-      if (error.status == 401) {
+      console.error('erro ao cadastra:', error.response ? error.response.status : error.message)
+      if (error.response && error.response.status === 401) {
         setMensagem(' Numero ou palavra-pass incorecta')
       }
-      if (error.status == 500) {
+      if (error.response && error.response.status === 500) {
         setMensagem('Erro do servido internto, contacte o suporte');
       }
 

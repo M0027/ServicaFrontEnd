@@ -1,5 +1,6 @@
 export interface Proposta {
   id: string;
+  client_phone: string;
   professional_id: string;
   order_id: string;
   message: string;
@@ -72,6 +73,10 @@ export interface Comment {
 
 export interface UserData {
   token: string;
+  id: string;
+  role: string;
+  service_id: string;
+  name: string;
   user: {
     id: string;
     name: string;

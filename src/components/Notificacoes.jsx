@@ -1,9 +1,12 @@
+import { CgNotifications } from 'react-icons/cg';
 import { FaBell } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 export default function NotificationBell({ isLogged, isUser, notifications, texto }) {
   // Simula array de notificações (substitua pelo seu estado real)
   const notificationCount = notifications?.length || 0;
+
+  console.log('notificacoes no notifi:', notifications)
   
   // Só mostra se estiver logado e tiver notificações
   if (!isLogged) return null;
@@ -11,11 +14,11 @@ export default function NotificationBell({ isLogged, isUser, notifications, text
   return (
     <div className="relative">
       <Link 
-        to={isUser ? "/orders" : "/prof_respostas"} 
+        to={"/prof_respostas"} 
         className="text-white hover:text-gray-200 transition-colors"
       >
-        {/* <FaBell className="text-2xl" /> */}
-        {texto}
+        <FaBell className="text-2xl" />
+        {/* {texto} */}
         
         {/* Badge com contagem */}
         {notificationCount > 0 && (

@@ -1,10 +1,11 @@
 // import { motion } from "framer-motion/client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { get, useForm } from "react-hook-form";
 import { FaTools, FaHeading, FaAlignLeft, FaCalendarAlt, FaMapMarkerAlt, FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import Spinner from '../components/Spinner';
+import AuthContext from "../context/AuthContext";
 
 // Arrays fictícios
 
@@ -14,6 +15,7 @@ export default function BudgetRequest() {
 
     const [serviceTypes_default, setServiceTypes_default] = useState([]);
     const [selectedService, setSelectedService] = useState(null);
+    const {token}=useContext(AuthContext)
 
     const navigate = useNavigate()
 
@@ -28,7 +30,6 @@ export default function BudgetRequest() {
     const location = useLocation()
     const { termos_De_pesquisa } = location.state || {};
     const dados = JSON.parse(localStorage.getItem('userData')) || {};
-    const token = dados?.token || null;
     const { register, handleSubmit, reset, formState: { errors }, trigger } = useForm();
 
     // const MotionP = motion.p;
@@ -142,9 +143,10 @@ export default function BudgetRequest() {
 
 
         const dados = JSON.parse(localStorage.getItem('userData')) || {};
-        const usuario = dados.user;
-        const client_id = usuario?.id || null;
-        setData({ ...formaData, client_id });
+        const client_id = dados?.id || null;
+        setData({ ...formaData, "client_id": client_id });
+
+        console.log(data)
 
 
 
@@ -193,14 +195,17 @@ export default function BudgetRequest() {
 
 
     const onSubmitAbnormal = async (Data) => {
+        const dados = JSON.parse(localStorage.getItem('userData')) || {};
+        const client_id = dados?.id || null;
+        setData({ ...Data, "client_id": client_id });
         // os dados prenchidos sao colocados no local storage
         // depois que forem ou nao usados sao deletados do localstorage
 
-        // console.log('formadata', Data)
+        console.log('formadata', Data)
 
         try {
 
-            const enviar = await api.post('/pedidos/criar', Data, {
+            const enviar = await api.post('/pedidos/criar', data, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }

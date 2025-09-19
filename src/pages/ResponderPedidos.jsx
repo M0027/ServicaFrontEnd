@@ -1,6 +1,10 @@
 import { useForm } from "react-hook-form";
+import React, { useState, useEffect, useContext } from 'react';
 import { FaCommentDollar, FaMoneyBillWave, FaCalendarCheck } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"
+import api from '../services/api';
+import Spinner from"../components/Spinner"
+import AuthContext from "../context/AuthContext";
 
 export default function ProfessionalResponse() {
   const {
@@ -9,8 +13,58 @@ export default function ProfessionalResponse() {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log("Resposta do profissional:", data);
+  const {token}= useContext(AuthContext)
+  const [user, setUser]= useState({})
+  const [errorMessage, setErrorMessage]= useState('')
+  const [message, setMessage]= useState('')
+  const [loading, setLoading]= useState(false)
+
+  const { state } = useLocation();
+  const { id, user_id } = state || {}; // Get professional ID from location state
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('userData') || 'null');
+    setUser(userData)
+  },[]);
+
+
+  const onSubmit = async (data) => {
+
+    setLoading(true)
+
+
+    const Dados = {...data, "order_id": id, "user_id": user_id}
+    console.log(Dados)
+
+    try {
+      const response = await api.post(`/propostas`, Dados, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+
+      });
+      
+      
+      console.log('aqui:', response.data.message)
+      setMessage(response?.data?.message)
+      
+    } catch (error) {
+      if (error.status !== 400) {
+          setErrorMessage(error?.response?.data.error)
+      }
+      if (error.status == 400) {
+          setErrorMessage(error?.response?.data.errors[0].msg)
+      }
+      console.error('erro ao responde pedido:', error)
+    }finally{
+      setLoading(false)
+    }
+
+    // console.log("Resposta do profissional:", Dados);
+
+
+
+    
     // Lógica de envio aqui
   };
 
@@ -61,37 +115,45 @@ export default function ProfessionalResponse() {
           </div>
 
           {/* Campo: Data de Término */}
-          <div>
+          {/* <div>
             <label className="block text-gray-700 mb-2">Data de Conclusão</label>
             <div className="relative">
               <FaCalendarCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                {...register("completionDate", { required: "Defina a data" })}
+                {...register("event_date", { required: "Defina a data" })}
                 type="date"
                 className="w-full pl-10 p-3 border-b-2 border-gray-300 focus:border-vinho focus:outline-none"
               />
             </div>
-            {errors.completionDate && (
-              <p className="text-red-500 text-sm mt-1">{errors.completionDate.message}</p>
+            {errors.event_date && (
+              <p className="text-red-500 text-sm mt-1">{errors.event_date.message}</p>
             )}
-          </div>
+          </div> */}
 
           {/* Botões */}
           <div className="flex gap-4">
             <Link
               to="/orders" // Altere para a rota desejada (ex: pedidos pendentes)
               className="flex-1 bg-gray-300 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-400 transition-colors text-center"
-            >
+            > 
               Cancelar
             </Link>
             <button
               type="submit"
               className="flex-1 bg-vinho text-white py-3 px-4 rounded-lg hover:bg-[#6a001a] transition-colors"
-            >
-              Enviar Resposta
+            > 
+            {
+              loading? <Spinner/> : 
+              <span>Enviar Resposta</span> 
+              }
+              
+
             </button>
+
           </div>
         </form>
+            {!loading?<p className="text-red-500 text-center mt-5">{errorMessage}</p> : ""}
+            {!loading?<p className="text-green-500 text-center mt-5 text-2xl">{message}</p> : ""}
       </div>
     </div>
   );

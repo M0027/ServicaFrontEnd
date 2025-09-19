@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import {
   FaUser,
   FaEdit,
@@ -11,6 +11,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { ProfessionalProfile, UserData, Comment } from "../types/interfaces";
+import AuthContext from "../context/AuthContext";
 
 // Array fictício de avaliações
 // const mockReviews = [
@@ -18,9 +19,14 @@ import { ProfessionalProfile, UserData, Comment } from "../types/interfaces";
 // ];
 
 export default function ProfessionalProfiles() {
+  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { id } = state || {}; // Get professional ID from location state
+  const userData: UserData | null = JSON.parse(
+    localStorage.getItem("userData") || "null"
+  );
+  const user = userData;
 
   const [professional, setProfessional] = useState<ProfessionalProfile | null>(
     null
@@ -30,20 +36,17 @@ export default function ProfessionalProfiles() {
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [commentInput, setCommentInput] = useState<string>('');
+  const [commentInput, setCommentInput] = useState<string>("");
 
   const fetchComments = useCallback(async () => {
     const userData: UserData | null = JSON.parse(
       localStorage.getItem("userData") || "null"
     );
-    if (!userData || !userData.token) {
-      navigate("/login");
-      return;
-    }
+
     try {
       const response = await api.get<Comment[]>(`/comments/${id}`, {
         headers: {
-          Authorization: `Bearer ${userData.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setComments(response.data);
@@ -57,7 +60,7 @@ export default function ProfessionalProfiles() {
     const userData: UserData | null = JSON.parse(
       localStorage.getItem("userData") || "null"
     );
-    if (!userData || !userData.token || !userData.user.id) {
+    if (!token) {
       navigate("/login");
       return;
     }
@@ -68,16 +71,16 @@ export default function ProfessionalProfiles() {
         `/comments`,
         {
           professional_id: id,
-          user_id: userData.user.id,
+          user_id: user?.id,
           comment: commentInput,
         },
         {
           headers: {
-            Authorization: `Bearer ${userData.token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      setCommentInput('');
+      setCommentInput("");
       // Refetch comments to show the new one
       fetchComments();
     } catch (error) {
@@ -90,7 +93,7 @@ export default function ProfessionalProfiles() {
       localStorage.getItem("userData") || "null"
     );
 
-    if (!userData || !userData.token) {
+    if (!token) {
       navigate("/login");
       return;
     }
@@ -109,7 +112,7 @@ export default function ProfessionalProfiles() {
           `/professional/profile/${id}`,
           {
             headers: {
-              Authorization: `Bearer ${userData.token}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -118,7 +121,7 @@ export default function ProfessionalProfiles() {
         setProfessional(fetchedProfile);
         setFormData(fetchedProfile);
 
-        if (userData.user.id === fetchedProfile.user_id) {
+        if (user && user.id === fetchedProfile.user_id) {
           setIsOwner(true);
         } else {
           setIsOwner(false);
@@ -151,7 +154,7 @@ export default function ProfessionalProfiles() {
     const userData: UserData | null = JSON.parse(
       localStorage.getItem("userData") || "null"
     );
-    if (!userData || !userData.token) {
+    if (!token) {
       navigate("/login");
       return;
     }
@@ -160,7 +163,7 @@ export default function ProfessionalProfiles() {
       // Assuming the API expects specific fields for update
       await api.put(`/professional/profile/${id}`, formData, {
         headers: {
-          Authorization: `Bearer ${userData.token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       setProfessional(formData as ProfessionalProfile); // Update local state with saved data
@@ -193,7 +196,8 @@ export default function ProfessionalProfiles() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
-      <div className="relative h-48 bg-vinho-light">{/* Banner Section */}
+      <div className="relative h-48 bg-vinho-light">
+        {/* Banner Section */}
         <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-40 h-40 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center">
           {isEditing ? (
             <input
@@ -234,7 +238,7 @@ export default function ProfessionalProfiles() {
                 )}
               </div>
             )}
-            
+
             <div className="flex items-center justify-center text-gray-600 mb-2">
               <FaTools className="mr-2 text-vinho" />
               {isEditing ? (
@@ -379,13 +383,20 @@ export default function ProfessionalProfiles() {
           <div className="space-y-4 text-gray-700">
             {comments.length > 0 ? (
               comments.map((comment) => (
-                <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                <div
+                  key={comment.id}
+                  className="border-b border-gray-200 pb-4 last:border-b-0"
+                >
                   <div className="flex items-center mb-2">
                     <FaUser className="text-gray-400 mr-2" />
-                    <p className="font-semibold text-gray-800">{comment.name}</p>
+                    <p className="font-semibold text-gray-800">
+                      {comment.name}
+                    </p>
                   </div>
                   <p className="text-gray-700 mb-2">{comment.comment}</p>
-                  <p className="text-sm text-gray-500">{new Date(comment.created_at).toLocaleDateString()}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(comment.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               ))
             ) : (
