@@ -98,17 +98,12 @@ export default function Header() {
 
   const handleLogout = () => {
     logout()
-    // localStorage.removeItem('userData');
-    // setLogado(false);
-    // setUserData({});
-    // // Optionally redirect to home or login page
-    // navigate('/login'); 
   };
 
 
   return (
-    <header className="bg-[#800020] text-white sticky top-0 z-20 shadow-md">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+    <header className="bg-[#800020] w-full text-white sticky top-0 z-20 shadow-md">
+      <div className="container mx-auto px-4 py-3 flex  justify-between items-center">
         {/* Logo + Nome */}
 
 
@@ -120,7 +115,7 @@ export default function Header() {
                 <span className="text-xl font-bold">{user?.name}</span>
               </div> :
               <>
-              <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center">
+              <div className="h-10 w-10 bg-white rounded-full flex items-center justify-start">
                 <span className="text-[#800020] font-bold text-xl">SvJ</span> {/* Substitua por uma imagem */}
               </div>
               <span className="text-xl font-bold">Olá! Bem vindo ao ServiçaJá</span>
@@ -133,7 +128,7 @@ export default function Header() {
 
 
         {/* Menu Desktop (telas grandes) */}
-        <nav className="hidden md:flex space-x-6 items-center">
+        <nav className="hidden md:flex  space-x-6 items-center">
           {isAuthenticated && user.role === 'profissional' && (
             <button
               onClick={() => navigate('/prof_perfil', { state: { id: user.id } })}

@@ -49,7 +49,16 @@ export interface ProfessionalProfile {
   name?:string;
   service_name?:string;
   phone?: string;
-  status: 'pendente' | 'aprovado' | 'regeitado';
+  whatsapp: string;
+  // status: 'pendente' | 'aprovado' | 'regeitado';
+  status: any;
+  certificacoes : string;
+  clientes_atendidos: string;
+  deslocamento : string;
+  formas_pagamento: string;
+  experiencia: string;
+
+
   user?: {
     id: string;
     name: string;
