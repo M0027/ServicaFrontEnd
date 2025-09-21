@@ -24,6 +24,7 @@ export default function Header() {
   // adicionar intes no meno caso nao seja logado
 
   const verperfil = () => {
+    const user = JSON.parse(localStorage.getItem('userData')) || null;
     navigate('/prof_perfil', {state: {id:user.id}})
   }
 
@@ -65,8 +66,8 @@ export default function Header() {
         { name: "Home", href: "/" },
         { name: "Tornar-se Profissional", href: "/profile" },
         // { name: "Pedidos", href: "/orders" },
-        { name: "Help", href: "#" },
-        { name: "Suporte", href: "#" },
+        { name: "Help", href: "/help" },
+        { name: "Suporte", href: "https://wa.me/258833072296" },
 
       ];
 
@@ -110,7 +111,7 @@ export default function Header() {
         <div className="flex items-center space-x-2">
           {
             isAuthenticated ?
-              <div onClick={()=> verperfil()} className="cursor-pointer">
+              <div onClick={()=> verperfil()} className="cursor-pointer flex gap-2">
                 <FaUser className="text-2xl text-wight-400" />
                 <span className="text-xl font-bold">{user?.name}</span>
               </div> :

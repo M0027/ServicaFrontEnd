@@ -58,14 +58,12 @@ export default function Signup() {
       if ( enviar.status == 201) {
         setMensagemSucess('Cadastro realizado com sucesso')
         setMensagem(''); // limpar mensagem de erro
-
-        setTimeout(()=>{
           reset() // limpar os campos do formulario
 
           // redirecionamento em funcao dos tipo de usuario
           Navigate('/login') ; return;      // redirecionar para login
 
-        }, 3000)
+      
 
       }
       

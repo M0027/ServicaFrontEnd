@@ -4,6 +4,7 @@ import api from '../services/api';
 import { Order, UserData, ProfessionalProfile } from '../types/interfaces';
 import { FaCalendarAlt, FaMapMarkerAlt, FaTag, FaInfoCircle, FaClock, FaArrowRight } from 'react-icons/fa';
 import AuthContext from '../context/AuthContext';
+import Loading from '../components/Loading';
 
 
 export default function Orders() {
@@ -68,7 +69,7 @@ export default function Orders() {
         <h1 className="text-3xl font-bold text-vinho mb-8 text-center">Pedidos Disponíveis</h1>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500">Carregando pedidos...</div>
+          <Loading height='h-60'/>
         ) : errorMessage ? (
           <div className="text-center py-12 text-red-500">{errorMessage}</div>
         ) : orders.length === 0 ? (

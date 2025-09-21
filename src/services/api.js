@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Cria uma instância do Axios com configurações padrão
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", // Altere se sua API estiver em produção
+  baseURL: "http://192.168.56.1:3000/api", // Altere se sua API estiver em produção
   timeout: 10000, // Timeout de 10 segundos
 });
 
@@ -54,6 +54,8 @@ export const setupAxiosInterceptors = (logout, navigate) => {
         }
 
         if (error.response.status === 403 && !originalRequest._retry) {
+
+          if(error.response.status.error == "Sem nenhuma subiscricao.") return;
           originalRequest._retry = true;
           navigate("/403"); // redireciona para login
           return Promise.reject(error);

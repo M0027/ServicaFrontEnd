@@ -15,6 +15,8 @@ import Perfil_Respostas from './pages/Prof_Respostas'
 import Perfil_Prof from './pages/Prof_perfil'
 import ProfessionalProfiles from './pages/ProfessionalProfile'
 import ListOrder from "./pages/Orders"
+import HelpPage from'./pages/HelpPage'
+import SubScriptionHelpPage from'./pages/Subscripion'
 import { NotFound404, Unauthorized401, Forbidden403, NetworkError500 } from "./pages/ErrorPages";
 
 
@@ -79,7 +81,7 @@ export default function App() {
           element={
             <PrivateRoute>
               <Perfil_Prof/>
-            </PrivateRoute>
+            </PrivateRoute> 
           }
         />
         <Route
@@ -90,10 +92,19 @@ export default function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/subiscription"
+          element={
+            <PrivateRoute>
+              <SubScriptionHelpPage/>
+            </PrivateRoute>
+          }
+        />
          {/* rotas específicas de erro */}
          <Route path="/401" element={<Unauthorized401 />} />
         <Route path="/403" element={<Forbidden403 />} />
         <Route path="/500" element={<NetworkError500 />} />
+        <Route path="/help" element={<HelpPage />} />
 
         {/* rota coringa para 404 */}
         <Route path="*" element={<NotFound404 />} />

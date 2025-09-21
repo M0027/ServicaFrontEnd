@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import React, { useState, useEffect, useContext } from 'react';
 import { FaCommentDollar, FaMoneyBillWave, FaCalendarCheck } from "react-icons/fa";
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import api from '../services/api';
 import Spinner from"../components/Spinner"
 import AuthContext from "../context/AuthContext";
@@ -10,6 +10,7 @@ export default function ProfessionalResponse() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -19,6 +20,7 @@ export default function ProfessionalResponse() {
   const [message, setMessage]= useState('')
   const [loading, setLoading]= useState(false)
 
+  const navigate = useNavigate();
   const { state } = useLocation();
   const { id, user_id } = state || {}; // Get professional ID from location state
 
@@ -44,6 +46,9 @@ export default function ProfessionalResponse() {
 
       });
       
+      setErrorMessage('')
+      reset()
+      
       
       console.log('aqui:', response.data.message)
       setMessage(response?.data?.message)
@@ -52,8 +57,12 @@ export default function ProfessionalResponse() {
       if (error.status !== 400) {
           setErrorMessage(error?.response?.data.error)
       }
-      if (error.status == 400) {
-          setErrorMessage(error?.response?.data.errors[0].msg)
+      if (error.status !== 400) {
+          setErrorMessage(error?.response?.data.error)
+      }
+      if (error.status == 403) {
+          setErrorMessage(error?.response?.data.errors)
+          navigate('/subiscription')
       }
       console.error('erro ao responde pedido:', error)
     }finally{

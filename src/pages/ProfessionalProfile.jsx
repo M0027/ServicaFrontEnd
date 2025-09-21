@@ -91,7 +91,7 @@ export default function ProfessionalProfile() {
       localStorage.getItem("userData") || "null"
     );
 
-    const user_id = userData?.user?.id;
+    const user_id = userData?.id;
     const image_url = 'img.jpg'
     const Dados = { ...data, image_url, user_id }
     setLoading(true)
@@ -104,20 +104,20 @@ export default function ProfessionalProfile() {
         }
       });
 
-      if (enviar.status == 200) {
+      // console.log("Perfil profissional:", enviar);
+      if (enviar.status == 201) {
         setMensagemSucess(`${userData?.user?.name}, ${enviar?.data?.message}`)
         setMensagemError(''); // limpar mensagem de erro
 
-        console.log("Perfil profissional:", enviar);
-        setTimeout(() => {
-          reset() // limpar os campos do formulario
+       // setTimeout(() => {
           setMensagemSucess('');
           setMensagemError(''); // limpar mensagem de erro
 
           // redirecionamento em funcao dos tipo de usuario
           //navigate('/prof_perfil', { state: { user_id: id } }); return;      // redirecionar para login
           navigate('/')
-        }, 3000)
+          reset() // limpar os campos do formulario
+       // }, 3000)
 
       }
 
@@ -126,12 +126,12 @@ export default function ProfessionalProfile() {
     } catch (error) {
 
       console.error('erro ao cadastra:', error)
-      if (error.status == 500) {
-        setMensagemError('Erro do servido internto, contacte o suporte');
-      }
-      if (error.status == 400) {
+      // if (error.status == 500) {
+        setMensagemError(error?.response?.data);
+      // }
+      // if (error.status == 400) {
         setMensagemError('Todos os campos são obrigatórios.');
-      }
+      // }
 
     } finally {
       setLoading(false)
@@ -161,7 +161,7 @@ export default function ProfessionalProfile() {
               >
                 <option value="">Selecione seu serviço</option>
                 {serviceTypes?.map((service) => (
-                  <option key={service.id} value={service.id}>
+                  <option key={service.id} value={Number(service.id)}>
                     {service.name}
                   </option>
                 ))}
@@ -220,7 +220,7 @@ export default function ProfessionalProfile() {
 
 
           {messageSucess && <p className="text-xl text-green-600 text-center transition-all ease-out duration-75">{messageSucess}</p>}
-          {messageError && <p className="text-xl text-red-600 text-center transition-all ease-out duration-75">{messageSucess}</p>}
+          {messageError && <p className="text-xl text-red-600 text-center transition-all ease-out duration-75">{messageError}</p>}
 
           {/* Link para voltar */}
           <div className="text-center mt-4">

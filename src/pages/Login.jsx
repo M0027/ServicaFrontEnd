@@ -24,10 +24,10 @@ const schema = z.object({
 export default function Login() {
 
   const navigate = useNavigate()
-  const { login } = useContext(AuthContext);
+  const { login, loading } = useContext(AuthContext);
   const [Mensagem, setMensagem] = useState('')
   const [mensagemSucess, setMensagemSucess] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
 
 
 
@@ -40,39 +40,25 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data, e) => {
+    
     // console.log("Dados do login:", data);
-    setLoading(true)
+    setLoading(loading)
     try {
 
       const response = await api.post('/users/login', data)
 
-      // console.log(enviar)
-      setMensagemSucess('Login realizado com sucesso')
-      setMensagem(''); // limpar mensagem de erro
-
+      
       // persistir dados do usuario e token
-
       const { token, user } = response.data;
       login(token);
       localStorage.setItem('userData', JSON.stringify(user))
+      console.log(token, user)
+      setMensagemSucess('Login realizado com sucesso')
+      setMensagem(''); // limpar mensagem de erro
+      reset() // limpar os campos do formulari
 
-      setTimeout(() => {
-        reset() // limpar os campos do formulario
-
-        if (user.role == 'profissional') {
-
-          navigate('/'); return;     // redirecionar para login
-        }
-
-        navigate('/order'); return;
-
-      }, 2000)
-
-
-
-
-
+      navigate('/');    // redirecionar para home
     } catch (error) {
 
       console.error('erro ao cadastra:', error.response ? error.response.status : error.message)
@@ -142,7 +128,7 @@ export default function Login() {
             className="w-full bg-vinho text-white py-3 px-4 rounded-lg hover:bg-[#6a001a] transition-colors flex items-center justify-center"
           >
             {
-              loading? <Spinner/> :
+              Loading? <Spinner/> :
            <>Entrar <FaArrowRight className="ml-2" /></>
             }
           </button>

@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate()
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [token, setToken] = useState(null);
+    const [loading, setLoading] = useState(true)
     const [NOTIFICATIONS, setNOTIFICATION] = useState([]);
 
     useEffect(() => {
@@ -18,17 +19,18 @@ export const AuthProvider = ({ children }) => {
             setToken(storedToken);
             Notificacoes()
         }
+        setLoading(false)
     }, [navigate]);
 
 
     const Notificacoes = async () => {
-
+        
         if (!isAuthenticated) return;
-
+        
+        setLoading(true);
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('userData') || 'null');
         try {
-            // setLoading(true);
 
             if (user?.role !== 'profissional') {
                 const response = await api.get(`/propostas/${user?.id}`, {
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Erro ao buscar propostas:', error);
             // Optionally handle specific error messages or redirects
         } finally {
-            // setLoading(false);
+             setLoading(false);
         }
     };
 
@@ -71,6 +73,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', newToken);
         setIsAuthenticated(true);
         setToken(newToken);
+        setLoading(true)
     };
 
     const logout = () => {
@@ -80,7 +83,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, token, login, logout, NOTIFICATIONS }}>
+        <AuthContext.Provider value={{ isAuthenticated, token, login, logout, NOTIFICATIONS, loading }}>
             {children}
         </AuthContext.Provider>
     );

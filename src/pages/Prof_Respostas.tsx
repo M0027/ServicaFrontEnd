@@ -1,5 +1,5 @@
 import React, { useState, useEffect , useContext} from 'react';
-import { FaUser, FaCalendarAlt, FaMoneyBillWave, FaTrash, FaPhone, FaCheck, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaUser, FaCalendarAlt, FaMoneyBillWave, FaTrash, FaCheck, FaTimes, FaExternalLinkAlt } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { Proposta, UserData } from '../types/interfaces';
@@ -86,17 +86,23 @@ export default function MyProposals() {
     }
   };
 
-  const handleStatusUpdate = async (proposalId: string, status: 'aceite' | 'regeitado') => {
+  const handleStatusUpdate = async (proposalId: string, status: 'aceite' | 'regeitado', professional_id: string) => {
    
     if (!isAuthenticated){
       navigate('/login');
       return;
     }
 
+    const dados = {
+      'status': status,
+      'profissional_id': professional_id
+    }
+
+
     setLoading(true)
 
     try {
-      await api.put(`/propostas/${proposalId}`, { status }, {
+      await api.put(`/propostas/${proposalId}`, { dados }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -212,13 +218,13 @@ export default function MyProposals() {
                   {(proposal.status === 'pendente' && user?.role == 'cliente') && (
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => handleStatusUpdate(proposal.id, 'aceite')}
+                        onClick={() => handleStatusUpdate(proposal.id, 'aceite', proposal.professional_id)}
                         className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center"
                       >
                         <FaCheck className="mr-1" /> Aceitar
                       </button>
                       <button
-                        onClick={() => handleStatusUpdate(proposal.id, 'regeitado')}
+                        onClick={() => handleStatusUpdate(proposal.id, 'regeitado', proposal.professional_id)}
                         className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center"
                       >
                         <FaTimes className="mr-1" /> Rejeitar

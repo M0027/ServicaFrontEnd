@@ -13,6 +13,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { ProfessionalProfile, UserData, Comment } from "../types/interfaces";
 import AuthContext from "../context/AuthContext";
+import VerPedidosButton from "../components/Button/ButtonVerPerfil";
 
 /**
  * Página de Perfil do Profissional
@@ -105,8 +106,9 @@ export default function ProfessionalProfiles() {
     if (id) {
       fetchProfessionalProfile();
       fetchComments();
+      //fetchProfessionalProfile
     }
-  }, [id, fetchProfessionalProfile, fetchComments]);
+  }, [id, fetchComments]);
 
   /**
    * Carregando dados
@@ -250,6 +252,8 @@ function ProfileHeader({ professional }: { professional: ProfessionalProfile }) 
         ))}
         <span className="ml-2 text-gray-600">({professional.status})</span>
       </div>
+
+      <VerPedidosButton/>
     </div>
   );
 }
