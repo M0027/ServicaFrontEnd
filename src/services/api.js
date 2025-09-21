@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Cria uma instância do Axios com configurações padrão
 const api = axios.create({
-  baseURL: "http://192.168.56.1:3000/api", // Altere se sua API estiver em produção
+  baseURL: "http://10.112.190.154:3000/api", // Altere se sua API estiver em produção
   timeout: 10000, // Timeout de 10 segundos
 });
 
